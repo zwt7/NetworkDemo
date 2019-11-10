@@ -132,6 +132,7 @@ public class OkHttpActivity extends AppCompatActivity implements View.OnClickLis
                             else {
                                 //解析数据
                                 IpData data=ip.getData();
+                                //显示出来的只是放进去的值，别的那么多数据，显示不出来
                                 tvResult.setText(data.getIp()+","+data.getArea());
                             }
                         }
