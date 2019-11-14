@@ -220,7 +220,7 @@ public class OkHttpActivity extends AppCompatActivity implements View.OnClickLis
             }
         });
     }
-    //上传图片
+    //提交Multipart图片
    public static MediaType MEDIA_TYPE_PNG=MediaType.parse("img/png");
     private void uploadImage(String url,String fileName){
         //1.创建请求主体RequestBody
