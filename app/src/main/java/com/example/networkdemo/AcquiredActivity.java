@@ -17,9 +17,13 @@ import android.widget.TextView;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.example.networkdemo.model.OilPrice;
+import com.example.networkdemo.model.OilPriceBody;
+import com.example.networkdemo.model.OilPriceRes;
 import com.example.networkdemo.model.WeatherCurrent;
 import com.example.networkdemo.model.WeatherFuture;
 import com.example.networkdemo.model.WeatherRealtime;
+import com.show.api.ShowApiRequest;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -31,9 +35,13 @@ import java.util.List;
 public class AcquiredActivity extends AppCompatActivity implements View.OnClickListener {
     TextView tvShow;
     Button weather,price,news;
-    private static final String KEY="1b72dd975519dcd65cebad9d737860f1";
+    //易源数据的app_id和key
+    private static final String APP_ID="115365";
+    private static final String KEY="d547e55efb614426ba331f7ca24b534e";
+    private static final String FIVE_WEATHER_KEY="1b72dd975519dcd65cebad9d737860f1";
     private static final String WEATHER_URL="http://apis.juhe.cn/simpleWeather/query";
 
+    private static final String OIL_URL="http://route.showapi.com/138-46";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,18 +63,45 @@ public class AcquiredActivity extends AppCompatActivity implements View.OnClickL
                 getWeather("南京");
                 break;
             case R.id.today_oil:
+                getOilPrice("江苏");
                 break;
             case R.id.news:
                 break;
 
         }
     }
+//http://route.showapi.com/138-46?showapi_appid=115365&showapi_sign=d547e55efb614426ba331f7ca24b534e&prov=%E6%B1%9F%E8%8B%8F
+    private void getOilPrice(final String province) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                final String res=new ShowApiRequest(OIL_URL,APP_ID,KEY)
+                        .addTextPara("prov",province)
+                        .post();
+                tvShow.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        OilPriceRes priceRes=JSON.parseObject(res, OilPriceRes.class);
+                        if(priceRes!=null&&priceRes.getResCode()==0){
+                            OilPriceBody body=priceRes.getResBody();
+                            if(body!=null&&body.getRetCode()==0){
+                                List<OilPrice> prices=body.getList();
+                                tvShow.setText(prices.get(0).toString());
+                            }
+                        }
+                    }
+                });
+
+            }
+        }).start();
+
+    }
 
     private void getWeather(String city) {
 
         try {
             //1.组装数据请求的url
-            String url=WEATHER_URL+"?key="+KEY+"&city="+URLEncoder.encode(city,"utf-8");
+            String url=WEATHER_URL+"?key="+FIVE_WEATHER_KEY+"&city="+URLEncoder.encode(city,"utf-8");
             //2.使用okHTTP发送请求
             Request request=new Request.Builder().url(url).build();
             new OkHttpClient().newCall(request).enqueue(new Callback() {
